@@ -15,6 +15,7 @@ if os.path.exists(testDataFile):
     print("Number of sheet_list 1")
     print(sheet_list.__len__())
     fileExtension = '.feature'
+    featureFile = ''
     for sheetName in sheet_list:
         print(sheetName)
         df1 = xl.parse(sheetName)
@@ -24,7 +25,7 @@ if os.path.exists(testDataFile):
             featureFile = open(sheetName + fileExtension, 'a+')
         else:
             print("Can not open the file as it doesn't exists")
-            
+
         cucumberTable = open('test.txt', 'r')
         # appending the contents of the second file to the first file
         featureFile.write(cucumberTable.read())
