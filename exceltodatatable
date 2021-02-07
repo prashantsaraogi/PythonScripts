@@ -1,36 +1,38 @@
 # -*- coding: utf-8 -*-
-import numpy as np
 import xlrd
+import os
 import pandas as pd
 
 # Assign spreadsheet filename to `file`
 testDataFile = 'test.xls'
 
-wb = xlrd.open_workbook(testDataFile)
-
-# Load spreadsheet
-xl = pd.ExcelFile(testDataFile)
+if os.path.exists(testDataFile):
+    wb = xlrd.open_workbook(testDataFile)
+    # Load spreadsheet
+    xl = pd.ExcelFile(testDataFile)
+    sheet_list = wb.sheet_names()
+    print(sheet_list)
+    print("Number of sheet_list 1")
+    print(sheet_list.__len__())
+    fileExtension = '.feature'
+    for sheetName in sheet_list:
+        print(sheetName)
+        df1 = xl.parse(sheetName)
+        df1.to_csv('test.txt', sep='|', index=False)
+        # opening first file in append mode and second file in read mode
+        if os.path.exists(testDataFile):
+            featureFile = open(sheetName + fileExtension, 'a+')
+        else:
+            print("Can not open the file as it doesn't exists")
+            
+        cucumberTable = open('test.txt', 'r')
+        # appending the contents of the second file to the first file
+        featureFile.write(cucumberTable.read())
+        # closing the files
+        featureFile.close()
+        cucumberTable.close()
+        print(df1)
+else:
+    print("Can not open the file as it doesn't exists")
 
 # Get the list of the sheets name
-sheet_list = wb.sheet_names()
-print(sheet_list)
-print("Number of sheet_list 1")
-print(sheet_list.__len__())
-fileExtension = '.feature'
-
-for sheetName in sheet_list:
-    print(sheetName)
-    df1 = xl.parse(sheetName)
-    df1.to_csv('test.txt', sep='|', index=False)
-    # opening first file in append mode and second file in read mode
-    featureFile = open(sheetName+fileExtension, 'a+')
-    cucumberTable = open('test.txt', 'r')
-    # appending the contents of the second file to the first file
-    featureFile.write(cucumberTable.read())
-    # closing the files
-    featureFile.close()
-    cucumberTable.close()
-    print(df1)
-
-print("End of programe")
-
