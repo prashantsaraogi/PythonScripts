@@ -1,0 +1,107 @@
+import configparser
+import re
+
+import pandas as pd
+import numpy as np
+
+# from pandas.tests.io.excel.test_openpyxl import openpyxl
+
+# configParser = configparser.RawConfigParser()
+configParser = configparser.ConfigParser()
+# configFilePath = r'configuration.txt'
+print('path1')
+configParser.read('configuration.txt')
+print('path2')
+path1 = configParser.get('My Section', 'path1')
+print('path3')
+path2 = configParser.get('My Section', 'path2')
+path3 = configParser.get('My Section', 'path3')
+
+print(path1)
+print(path2)
+
+data = pd.read_excel('GoldenTestdata.xlsx', engine='openpyxl')  # compare 2 data frames
+print(data)
+df1 = pd.read_excel('GoldenTestdata.xlsx', engine='openpyxl')
+df2 = pd.read_excel('ProdTestdata.xlsx', engine='openpyxl')
+
+f = open('status_check.txt', 'w+')
+
+columns_lst1 = list(df1.columns)
+columns_lst2 = list(df2.columns)
+same_count = 0
+diff_count = 0
+j = 0
+for i in columns_lst1:
+    if i == columns_lst2[j]:
+        same_count = same_count + 1
+    else:
+        diff_count = diff_count + 1
+        f.write("'{}', '{}' : this is different column\n".format(i, columns_lst2[j]))
+    j = j + 1
+
+if diff_count == 0:
+    f.write('All columns are same\n')
+else:
+    f.write('Column count which is different %i\n' % (diff_count - same_count))
+
+for i in columns_lst1:
+    if i in columns_lst2:
+        pass
+    else:
+        f.write("'{}' not found in second excel\n".format(i))
+
+for i in columns_lst2:
+    if i in columns_lst1:
+        pass
+    else:
+        f.write("'{}' not found in first excel\n".format(i))
+
+
+# case 3
+# Correcting 12 digit number to 10 digit number def correctNumber(number):
+def correct_number(number):
+    number = str(number)
+    if len(number) == 12:
+        number = number[2:]
+    return number
+
+
+# put the column name below which you need modification data['Village Code'] = data['Village Code'].apply(
+# correctNumber)
+# Removing zeros after decimals
+
+def remove_zeros(text):
+    text = str(text)
+    # print(text)
+    # text = re.sub(r'\b0+(\d)', r'\1', text)
+    # text = re.sub(r'\b(091){1}+(\d)', r'\1', text)
+    # text = re.sub(r'\b(091){1}', r'\1', text)
+    text = re.sub('91', '', text)
+    print(text)
+    data['Village Code'] = data.replace(text)
+    return text
+
+
+data['Village Code'] = data['Village Code'].apply(remove_zeros)
+
+# print(data)
+
+# Print two data frame difference
+
+df = pd.concat([df1, df2])
+df = df.reset_index(drop=True)
+df_gpby = df.groupby(list(df.columns))
+idx = [x[0] for x in df_gpby.groups.values() if len(x) == 1]
+df.reindex(idx)
+
+df_diff = pd.concat([df1, df2]).drop_duplicates(keep=False)
+
+print(df_diff)
+
+# Create new column in df1 to check if prices match
+df1['Health Score Match?'] = np.where(df1['Health Score'] == df2['Health Score'], 'True', 'False')
+
+print(df1)
+
+f.close()
